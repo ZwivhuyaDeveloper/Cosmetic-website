@@ -7,3 +7,5 @@ export const ease = {
   outBack: (t: number) => 1 + 2.7*Math.pow(t-1,3) + 1.7*Math.pow(t-1,2),
   expo:    (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10*t),
 };
+
+export type EaseName = keyof typeof ease;

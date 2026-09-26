@@ -3,13 +3,12 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { useScrollStore } from "../lib/useScrollStore";
-import { SECTIONS } from "../lib/sections";
+import { readTrack } from "../lib/sample";
 
 export default function SubtitleOverlay() {
   const containerRef = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
 
-  // Build timeline once
   useEffect(() => {
     if (!containerRef.current) return;
     const ctx = gsap.context(() => {
@@ -24,24 +23,17 @@ export default function SubtitleOverlay() {
     return () => ctx.revert();
   }, []);
 
-  // Subscribe to the store directly — no prop needed
   useEffect(() => {
-    const unsubscribe = useScrollStore.subscribe((state) => {
+    const unsub = useScrollStore.subscribe((state) => {
       const tl = tlRef.current;
       if (!tl) return;
-
-      const { start, end } = SECTIONS.subtitle;
-      const local = Math.max(0, Math.min(1, (state.scrollProgress - start) / (end - start)));
-
-      // Fade in over first 20%, hold, fade out over last 20%
-      let progress = 0;
-      if (local < 0.2) progress = local / 0.2;
-      else if (local < 0.8) progress = 1;
-      else progress = 1 - (local - 0.8) / 0.2;
-
-      tl.progress(progress);
+      // Read the raw opacity track from the subtitle section
+      const targetOpacity =
+        readTrack(state.scrollProgress, "subtitle", "text.opacity") ?? 0;
+      // Map opacity (0→1) to timeline progress (0→1)
+      tl.progress(targetOpacity);
     });
-    return () => unsubscribe();
+    return () => unsub();
   }, []);
 
   return (
@@ -54,11 +46,9 @@ export default function SubtitleOverlay() {
         <br />
         A COASTER.
       </h2>
-
       <p className="subtitle-right max-w-[320px] text-[22px] leading-snug text-[#f5e6d3] opacity-0">
-        Lumiere isn&apos;t just a make up. It&apos;s the result of amazing cosmetics.
+        Lumiere isn&apos;t just a make up.
       </p>
-
       <span className="subtitle-footnote absolute bottom-8 right-8 text-right text-[11px] tracking-widest text-[#f5e6d3]/70 opacity-0">
         LOOK
         <br />
