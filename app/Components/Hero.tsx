@@ -6,7 +6,7 @@ export default function Hero() {
 
     return (
         <section ref={containerRef} className="relative h-screen w-full overflow-hidden">
-            <div className="relative z-10 pointer-events-none h-full">
+            <div className="relative pointer-events-none h-full">
                 <Header />
                 <div className="absolute top-1/2 left-[8%] -translate-y-1/2">
                     <h1 className="text-[120px] font-black leading-none text-[#f5e6d3] tracking-tighter">

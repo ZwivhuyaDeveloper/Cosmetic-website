@@ -9,7 +9,7 @@ import Scene from "./Scene";
 import SubtitleOverlay from "./SubtitleOverlay";
 import Hero from "./Hero";
 
-export default function HeroSection() {
+export default function Container() {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollProgress = useScrollStore((s) => s.scrollProgress); // only for the indicator
 

@@ -1,10 +1,10 @@
-import HeroSection from "./Components/HeroSection";
+import Container from "./Components/Container";
 
 
 export default function Home() {
   return (
     <main className="relative h-[300vh]">
-      <HeroSection />
+      <Container />
     </main>
   );
 }
