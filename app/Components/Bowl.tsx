@@ -10,7 +10,19 @@ import { ease } from "../lib/easing";
 export default function Bowl() {
   const meshRef = useRef<THREE.Mesh>(null);
 
-  const MAX_LIFT = 2;
+  // ─── POSITION ───
+  const START_Y = 0.2;
+  const LIFT_Y  = 1.0;
+  const DROP_Y  = 0.2;
+
+  // ─── ROTATION WINDOW ───
+  // Rotation spans from the start of hero through the end of outro.
+  // At scroll = ROTATION_WINDOW.end, rotation = 720° (= 0° visually).
+  // Through the drop section, rotation is locked at that value.
+  const ROTATION_WINDOW = {
+    start: SECTIONS.hero.start,    // 0.00
+    end:   SECTIONS.outro.end,     // 0.85
+  };
   const RADIANS_PER_AXIS = THREE.MathUtils.degToRad(720);
 
   const geometry = useMemo(() => {
@@ -43,27 +55,28 @@ export default function Bowl() {
   useFrame(() => {
     if (!meshRef.current) return;
 
-    // Read straight from the conductor — no prop drilling
     const scroll = useScrollStore.getState().scrollProgress;
     const p = THREE.MathUtils.clamp(scroll, 0, 1);
 
-    // Position: eased lift across the hero section only
-    const liftT = phase(p, SECTIONS.hero);
-    meshRef.current.position.y = ease.inOut(liftT) * MAX_LIFT;
+    // ─────────────── POSITION ───────────────
+    const heroT = phase(p, SECTIONS.hero);
+    let targetY = START_Y + (LIFT_Y - START_Y) * ease.inOut(heroT);
 
-    // Rotation: continuous 0 → 720° on all axes over the full scroll
-    meshRef.current.rotation.x = p * RADIANS_PER_AXIS;
-    meshRef.current.rotation.y = p * RADIANS_PER_AXIS;
-    meshRef.current.rotation.z = p * RADIANS_PER_AXIS;
-
-    // Endpoint lock for exact seamless handoff
-    if (p === 1) {
-      meshRef.current.rotation.set(
-        RADIANS_PER_AXIS,
-        RADIANS_PER_AXIS,
-        RADIANS_PER_AXIS
-      );
+    if (p >= SECTIONS.drop.start) {
+      const dropT = phase(p, SECTIONS.drop);
+      targetY = LIFT_Y + (DROP_Y - LIFT_Y) * ease.in(dropT);
     }
+
+    meshRef.current.position.y = targetY;
+
+    // ─────────────── ROTATION ───────────────
+    // Smoothly rotates 0° → 720° across the full window:
+    //   hero → overlay → subtitle → outro
+    // Past 0.85 it naturally returns 1, so rotation stays at 720° (= 0° visually).
+    const rotT = phase(p, ROTATION_WINDOW);
+    const rotValue = rotT * RADIANS_PER_AXIS;
+
+    meshRef.current.rotation.set(rotValue, rotValue, rotValue);
   });
 
   return (
@@ -73,7 +86,7 @@ export default function Bowl() {
       material={material}
       castShadow
       receiveShadow
-      position={[0, 0.2, 0]}
+      position={[0, START_Y, 0]}
     />
   );
 }
