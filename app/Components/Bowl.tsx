@@ -1,10 +1,11 @@
+//  this is a placeholder mech design for now.
 "use client";
 
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useScrollStore } from "../lib/useScrollStore";
-import { readAnywhere } from "../lib/sample";
+import { readTrack } from "../lib/sample";
 
 export default function Bowl() {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -38,9 +39,16 @@ export default function Bowl() {
     if (!meshRef.current) return;
     const scroll = useScrollStore.getState().scrollProgress;
 
-    const y = readAnywhere(scroll, "bowl.y") ?? 0.2;
-    const rotDeg = readAnywhere(scroll, "bowl.rotation") ?? 0;
+    const y = readTrack(scroll, "bowl.y") ?? 0.2;
+    const rot = readTrack(scroll, "bowl.rotation") ?? 0;
+    const rotDeg = readTrack(scroll, "bowl.rotation") ?? 0;
     const rotRad = THREE.MathUtils.degToRad(rotDeg);
+    meshRef.current.position.y = y;
+    meshRef.current.rotation.set(
+      THREE.MathUtils.degToRad(rot),
+      THREE.MathUtils.degToRad(rot),
+      THREE.MathUtils.degToRad(rot)
+    );
 
     meshRef.current.position.y = y;
     meshRef.current.rotation.set(rotRad, rotRad, rotRad);

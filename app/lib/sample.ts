@@ -1,60 +1,23 @@
-import { TIMELINE, SectionName, Section, Track, Keyframe } from "./timeline";
-import { ease } from "./easing";
+import { TRACKS, Track, Keyframe } from "./timeline";
+import { getEase } from "./easing";
 
-const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+export function readTrack(scroll: number, trackName: string): number | undefined {
+  const track = TRACKS[trackName as keyof typeof TRACKS] as Track | undefined;
+  if (!track || track.length === 0) return undefined;
 
-/** Local 0→1 progress within a section. */
-export function sectionProgress(
-  scroll: number,
-  section: Section
-): number {
-  return clamp01((scroll - section.start) / (section.end - section.start));
-}
-
-/** Interpolate a track at the given local progress. */
-function sampleTrack(track: Track<number>, local: number): number {
-  // Before first keyframe
-  if (local <= track[0].at) return track[0].value;
-
-  // After last keyframe
+  if (scroll <= track[0].scroll) return track[0].value;
   const last = track[track.length - 1];
-  if (local >= last.at) return last.value;
+  if (scroll >= last.scroll) return last.value;
 
-  // Find surrounding keyframes and interpolate
   for (let i = 0; i < track.length - 1; i++) {
-    const a: Keyframe<number> = track[i];
-    const b: Keyframe<number> = track[i + 1];
-    if (local >= a.at && local <= b.at) {
-      const span = b.at - a.at || 1;
-      const raw = (local - a.at) / span;
-      const eased = ease[b.ease ?? "linear"](raw);
+    const a: Keyframe = track[i];
+    const b: Keyframe = track[i + 1];
+    if (scroll >= a.scroll && scroll <= b.scroll) {
+      const span = b.scroll - a.scroll || 1;
+      const raw = (scroll - a.scroll) / span;
+      const eased = getEase(b.ease ?? "none")(raw);   // ← GSAP easing
       return a.value + (b.value - a.value) * eased;
     }
   }
   return last.value;
-}
-
-/** Read any track by name from a named section. */
-export function readTrack(
-  scroll: number,
-  sectionName: SectionName,
-  trackName: string
-): number | undefined {
-  const section = TIMELINE[sectionName] as Section;
-  const track = section.tracks[trackName];
-  if (!track) return undefined;
-  const local = sectionProgress(scroll, section);
-  return sampleTrack(track, local);
-}
-
-/** Read the same track name across all sections (first match wins). */
-export function readAnywhere(
-  scroll: number,
-  trackName: string
-): number | undefined {
-  for (const name of Object.keys(TIMELINE) as SectionName[]) {
-    const v = readTrack(scroll, name, trackName);
-    if (v !== undefined) return v;
-  }
-  return undefined;
 }

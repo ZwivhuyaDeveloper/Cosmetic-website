@@ -1,10 +1,11 @@
 "use client";
 
+import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Environment, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 import Table from "./Table";
-import Bowl from "./Bowl";
+import Lipstick from "./Lipstick";
 import Overlay from "./Overlay";
 
 export default function Scene() {
@@ -21,16 +22,26 @@ export default function Scene() {
       }}
       style={{ background: "transparent" }}
     >
+      {/* ── Lights and non-suspending stuff can stay outside ── */}
       <ambientLight intensity={0.6} />
       <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
       <spotLight position={[-5, 8, -5]} angle={0.5} penumbra={0.5} intensity={0.8} castShadow />
       <Environment preset="studio" />
 
-      <Table />
-      <Overlay />
-      <Bowl />
+      {/* ── Anything that loads assets MUST be inside Suspense ── */}
+      <Suspense fallback={null}>
+        <Table />
+        <Lipstick />
+        <Overlay />
 
-      <ContactShadows position={[0, 0.01, 0]} opacity={0.4} scale={10} blur={2} far={4} />
+        <ContactShadows
+          position={[0, 0.01, 0]}
+          opacity={0.4}
+          scale={10}
+          blur={2}
+          far={4}
+        />
+      </Suspense>
     </Canvas>
   );
 }

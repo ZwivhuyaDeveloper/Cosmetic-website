@@ -29,7 +29,7 @@ export default function SubtitleOverlay() {
       if (!tl) return;
       // Read the raw opacity track from the subtitle section
       const targetOpacity =
-        readTrack(state.scrollProgress, "subtitle", "text.opacity") ?? 0;
+        readTrack(state.scrollProgress, "text.opacity") ?? 0;
       // Map opacity (0→1) to timeline progress (0→1)
       tl.progress(targetOpacity);
     });
