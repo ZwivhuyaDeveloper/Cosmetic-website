@@ -1,9 +1,31 @@
 // lib/easing.ts
-export const ease = {
-  linear:  (t: number) => t,
-  inOut:   (t: number) => t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2,
-  out:     (t: number) => 1 - Math.pow(1 - t, 3),
-  in:      (t: number) => t * t * t,
-  outBack: (t: number) => 1 + 2.7*Math.pow(t-1,3) + 1.7*Math.pow(t-1,2),
-  expo:    (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10*t),
-};
+
+import gsap from "gsap";
+
+// GSAP eases available by name — full list at https://gsap.com/docs/v3/Eases
+export type EaseName =
+  | "none"           // linear
+  | "power1.in"      | "power1.out"      | "power1.inOut"
+  | "power2.in"      | "power2.out"      | "power2.inOut"
+  | "power3.in"      | "power3.out"      | "power3.inOut"
+  | "power4.in"      | "power4.out"      | "power4.inOut"
+  | "sine.in"        | "sine.out"        | "sine.inOut"
+  | "expo.in"        | "expo.out"        | "expo.inOut"
+  | "circ.in"        | "circ.out"        | "circ.inOut"
+  | "back.in"        | "back.out"        | "back.inOut"
+  | "elastic.in"     | "elastic.out"     | "elastic.inOut"
+  | "bounce.in"      | "bounce.out"      | "bounce.inOut";
+
+// Cache parsed eases so we don't re-parse every frame
+const cache = new Map<string, (t: number) => number>();
+
+export function getEase(name: EaseName = "none"): (t: number) => number {
+  let fn = cache.get(name);
+  if (!fn) {
+    fn = gsap.parseEase(name);
+    cache.set(name, fn);
+  }
+  return fn;
+}
+
+

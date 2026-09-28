@@ -2,60 +2,49 @@
 
 import { useMemo } from "react";
 import * as THREE from "three";
+import { useTexture } from "@react-three/drei";
 
 export default function Table() {
-  const matTexture = useMemo(() => {
-    const size = 1024;
-    const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d")!;
+  const [albedo, normal, roughness, ao] = useTexture([
+    "/textures/marble/Marble014_2K-JPG_Color.jpg",
+    "/textures/marble/Marble014_2K-JPG_NormalGL.jpg",
+    "/textures/marble/Marble014_2K-JPG_Roughness.jpg",
+    "/textures/marble/Marble014_2K-JPG_Displacement.jpg",
+  ]);
 
-    // Base green cutting mat color
-    ctx.fillStyle = "#2d4a3e";
-    ctx.fillRect(0, 0, size, size);
+  useMemo(() => {
+    // ── COLOR SPACE: only albedo is sRGB ──
+    albedo.colorSpace = THREE.SRGBColorSpace;
 
-    // Grid lines
-    ctx.strokeStyle = "rgba(255,255,255,0.15)";
-    ctx.lineWidth = 1;
-    const step = size / 20;
-    for (let i = 0; i <= 20; i++) {
-      ctx.beginPath();
-      ctx.moveTo(i * step, 0);
-      ctx.lineTo(i * step, size);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(0, i * step);
-      ctx.lineTo(size, i * step);
-      ctx.stroke();
-    }
+    // Data maps stay linear (default) — do NOT set colorSpace on these.
+    normal.colorSpace    = THREE.NoColorSpace;
+    roughness.colorSpace = THREE.NoColorSpace;
+    ao.colorSpace        = THREE.NoColorSpace;
 
-    // Ruler numbers (simplified)
-    ctx.fillStyle = "rgba(255,255,255,0.4)";
-    ctx.font = "18px monospace";
-    for (let i = 0; i <= 20; i += 2) {
-      ctx.fillText(String(i * 10), i * step + 4, size - 8);
-      ctx.fillText(String(i * 10), 4, i * step - 8);
-    }
-
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(3, 3);
-    tex.anisotropy = 16;
-    return tex;
-  }, []);
+    // ── TILING: same UV across all maps ──
+    const REPEAT = 2;
+    [albedo, normal, roughness, ao].forEach((t) => {
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(REPEAT, REPEAT);
+      t.anisotropy = 16;
+    });
+  }, [albedo, normal, roughness, ao]);
 
   return (
-    <mesh
-      rotation={[-Math.PI / 2, 0, 0]}
-      position={[0, 0, 0]}
-      receiveShadow
-    >
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
       <planeGeometry args={[20, 20]} />
-      <meshStandardMaterial
-        map={matTexture}
-        roughness={0.85}
-        metalness={0.05}
+      <meshPhysicalMaterial
+        map={albedo}
+        normalMap={normal}
+        normalScale={new THREE.Vector2(0.6, 0.6)}
+        roughnessMap={roughness}
+        roughness={1.0}          // multiplier — keeps map variance
+        metalness={0.0}          // marble is dielectric
+        aoMap={ao}
+        aoMapIntensity={0.8}
+        clearcoat={0.9}
+        clearcoatRoughness={0.1}
+        envMapIntensity={0.8}
       />
     </mesh>
   );

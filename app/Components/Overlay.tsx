@@ -4,19 +4,16 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useScrollStore } from "../lib/useScrollStore";
-import { SECTIONS, phase } from "../lib/sections";
-import { ease } from "../lib/easing";
+import { readTrack } from "../lib/sample";
 
 export default function Overlay() {
   const meshRef = useRef<THREE.Mesh>(null);
 
   useFrame(() => {
     if (!meshRef.current) return;
-    const scroll = useScrollStore.getState().scrollProgress;
 
-    // Fade in during the second half of the hero section
-    const heroT = phase(scroll, SECTIONS.hero);
-    const targetOpacity = ease.inOut(Math.max(0, (heroT - 0.4) / 0.6));
+    const scroll = useScrollStore.getState().scrollProgress;
+    const targetOpacity = readTrack(scroll, "overlay.opacity") ?? 0;
 
     const mat = meshRef.current.material as THREE.MeshBasicMaterial;
     mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.1);
