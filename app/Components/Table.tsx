@@ -1,47 +1,70 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import * as THREE from "three";
-import { useTexture } from "@react-three/drei";
+
+import albedoImg    from "../../public/textures/marble/Marble014_2K-JPG_Color.jpg";
+import normalImg    from "../../public/textures/marble/Marble014_2K-JPG_NormalGL.jpg";
+import roughnessImg from "../../public/textures/marble/Marble014_2K-JPG_Roughness.jpg";
+
+const albedoUrl    = typeof albedoImg    === "string" ? albedoImg    : (albedoImg as any).src;
+const normalUrl    = typeof normalImg    === "string" ? normalImg    : (normalImg as any).src;
+const roughnessUrl = typeof roughnessImg === "string" ? roughnessImg : (roughnessImg as any).src;
 
 export default function Table() {
-  const [albedo, normal, roughness, ao] = useTexture([
-    "/textures/marble/Marble014_2K-JPG_Color.jpg",
-    "/textures/marble/Marble014_2K-JPG_NormalGL.jpg",
-    "/textures/marble/Marble014_2K-JPG_Roughness.jpg",
-    "/textures/marble/Marble014_2K-JPG_Displacement.jpg",
-  ]);
+  const [maps, setMaps] = useState<{
+    albedo: THREE.Texture;
+    normal: THREE.Texture;
+    roughness: THREE.Texture;
+  } | null>(null);
 
-  useMemo(() => {
-    // ── COLOR SPACE: only albedo is sRGB ──
-    albedo.colorSpace = THREE.SRGBColorSpace;
+  useEffect(() => {
+    const loader = new THREE.TextureLoader();
 
-    // Data maps stay linear (default) — do NOT set colorSpace on these.
-    normal.colorSpace    = THREE.NoColorSpace;
-    roughness.colorSpace = THREE.NoColorSpace;
-    ao.colorSpace        = THREE.NoColorSpace;
+    const load = (url: string) =>
+      new Promise<THREE.Texture>((resolve, reject) => {
+        loader.load(
+          url,
+          (tex) => resolve(tex),
+          undefined,
+          () => reject(new Error(`Failed to load: ${url}`))
+        );
+      });
 
-    // ── TILING: same UV across all maps ──
-    const REPEAT = 2;
-    [albedo, normal, roughness, ao].forEach((t) => {
-      t.wrapS = t.wrapT = THREE.RepeatWrapping;
-      t.repeat.set(REPEAT, REPEAT);
-      t.anisotropy = 16;
-    });
-  }, [albedo, normal, roughness, ao]);
+    console.log("Loading:", albedoUrl, normalUrl, roughnessUrl);
+
+    Promise.all([load(albedoUrl), load(normalUrl), load(roughnessUrl)])
+      .then(([albedo, normal, roughness]) => {
+        albedo.colorSpace = THREE.SRGBColorSpace;
+        [albedo, normal, roughness].forEach((t) => {
+          t.wrapS = t.wrapT = THREE.RepeatWrapping;
+          t.repeat.set(2, 2);
+          t.anisotropy = 16;
+        });
+        setMaps({ albedo, normal, roughness });
+      })
+      .catch((e) => console.error("[Table]", e));
+  }, []);
+
+  if (!maps) {
+    return (
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
+        <planeGeometry args={[20, 20]} />
+        <meshPhysicalMaterial color="#e8e4dc" roughness={0.3} metalness={0} />
+      </mesh>
+    );
+  }
 
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
       <planeGeometry args={[20, 20]} />
       <meshPhysicalMaterial
-        map={albedo}
-        normalMap={normal}
+        map={maps.albedo}
+        normalMap={maps.normal}
         normalScale={new THREE.Vector2(0.6, 0.6)}
-        roughnessMap={roughness}
-        roughness={1.0}          // multiplier — keeps map variance
-        metalness={0.0}          // marble is dielectric
-        aoMap={ao}
-        aoMapIntensity={0.8}
+        roughnessMap={maps.roughness}
+        roughness={1.5}
+        metalness={0.0}
         clearcoat={0.9}
         clearcoatRoughness={0.1}
         envMapIntensity={0.8}
