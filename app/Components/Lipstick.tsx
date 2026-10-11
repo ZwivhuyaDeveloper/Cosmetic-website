@@ -6,8 +6,23 @@ import * as THREE from "three";
 import { useScrollStore } from "../lib/useScrollStore";
 import { readTrack } from "../lib/sample";
 
+const BULLET_PROFILE = (() => {
+  const pts: THREE.Vector2[] = [
+    new THREE.Vector2(0, 0),
+    new THREE.Vector2(0.29, 0),
+    new THREE.Vector2(0.27, 0.7),
+  ];
+  const seg = 16;
+  for (let i = 1; i <= seg; i++) {
+    const t = (i / seg) * (Math.PI / 2);
+    pts.push(new THREE.Vector2(0.27 * Math.cos(t), 0.7 + 0.27 * Math.sin(t)));
+  }
+  return pts;
+})();
+
 export default function Lipstick() {
   const groupMesh = useRef<THREE.Group>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
 
   // Model built from y=0 (base bottom) → y=2.52 (bullet tip top)
   const CENTER_OFFSET = 1.26; // = 2.52 / 2
@@ -19,13 +34,17 @@ export default function Lipstick() {
     if (!groupMesh.current) return;
 
     const scroll = useScrollStore.getState().scrollProgress;
-    const y = (readTrack(scroll, "bowl.y") ?? 0.2) + Y_OFFSET;
-    const rx = THREE.MathUtils.degToRad(readTrack(scroll, "bowl.rotation.x") ?? 0);
-    const ry = THREE.MathUtils.degToRad(readTrack(scroll, "bowl.rotation.y") ?? 0);
-    const rz = THREE.MathUtils.degToRad(readTrack(scroll, "bowl.rotation.z") ?? 0);
-
+    const y = (readTrack(scroll, "lipstick.y") ?? 0.2) + Y_OFFSET;
+    const rx = THREE.MathUtils.degToRad(readTrack(scroll, "lipstick.rotation.x") ?? 0);
+    const ry = THREE.MathUtils.degToRad(readTrack(scroll, "lipstick.rotation.y") ?? 0);
+    const rz = THREE.MathUtils.degToRad(readTrack(scroll, "lipstick.rotation.z") ?? 0);
     groupMesh.current.position.y = y;
     groupMesh.current.rotation.set(rx, ry, rz);
+
+    if (!meshRef.current) return;
+
+    const capY = readTrack(scroll, "cap.y") ?? 0.0;
+    meshRef.current.position.y = capY;
   });
 
   return (
@@ -37,6 +56,16 @@ export default function Lipstick() {
 
           {/* Base tube — gold, matches reference case */}
           <mesh position={[0, 0.7, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[0.32, 0.32, 1.4, 64]} />
+            <meshStandardMaterial
+              color="#c9a44a"
+              roughness={0.28}
+              metalness={0.95}
+            />
+          </mesh>
+
+          {/* Cap — gold, matches reference case */}
+          <mesh ref={meshRef} position={[0, 2.1, 0]} castShadow receiveShadow>
             <cylinderGeometry args={[0.32, 0.32, 1.4, 64]} />
             <meshStandardMaterial
               color="#c9a44a"
@@ -67,19 +96,9 @@ export default function Lipstick() {
             <meshStandardMaterial color="#1a1a1a" roughness={0.45} metalness={0.5} />
           </mesh>
 
-          {/* Bullet body — deep red */}
-          <mesh position={[0, 1.9, 0]} castShadow receiveShadow>
-            <cylinderGeometry args={[0.27, 0.29, 0.7, 64]} />
-            <meshStandardMaterial
-              color="#a8203a"
-              roughness={0.42}
-              metalness={0.05}
-            />
-          </mesh>
-
-          {/* Bullet rounded tip */}
-          <mesh position={[0, 2.25, 0]} castShadow receiveShadow>
-            <sphereGeometry args={[0.27, 32, 24, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        {/* Bullet — deep red, single lathe mesh (body + rounded tip) */}
+          <mesh position={[0, 1.55, 0]} castShadow receiveShadow>
+            <latheGeometry args={[BULLET_PROFILE, 64]} />
             <meshStandardMaterial
               color="#a8203a"
               roughness={0.42}

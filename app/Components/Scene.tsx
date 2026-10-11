@@ -16,13 +16,14 @@ import Fabric from "./Fabric";
 import Lipstick from "./Lipstick";
 import MakeupProps from "./MakeupProps";
 import Overlay from "./Overlay";
+import Cube from "./Cube";
 
 export default function Scene() {
   return (
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 6, 0], fov: 45, near: 0.1, far: 150 }}
+      camera={{ position: [0, 6, 0], fov: 45, near: 0.1, far: 120 }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
@@ -90,6 +91,7 @@ export default function Scene() {
         <Overlay />
         <Table />
         <Lipstick />
+        {/* <Cube /> */}
 
         <ContactShadows
           position={[0, 0.011, 0]}
@@ -102,7 +104,7 @@ export default function Scene() {
       </Suspense>
 
 
-      {/* Effects */}
+      {/* Effects "use later" */}
       {/* <EffectComposer multisampling={4}>
         <DepthOfField
           focusDistance={10}
