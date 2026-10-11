@@ -35,21 +35,32 @@ export default function Scene() {
       <ambientLight intensity={0.08} color="#1a1c2e" />
 
       <directionalLight
-        position={[4, 9, 5]}
-        intensity={2.6}
+        position={[4, 10, 5]}
+        intensity={10.0}
         color="#ffd6a8"
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0005}
         shadow-normalBias={0.02}
       />
+
+      <directionalLight
+        position={[-4, 10,-5]}
+        intensity={20.0}
+        color="#585654"
+        castShadow
+        shadow-mapSize={[2048, 2048]}
+        shadow-bias={-0.0005}
+        shadow-normalBias={0.02}
+      />
+      
       <directionalLight position={[-6, 4, -3]} intensity={0.55} color="#7da4ff" />
 
       <spotLight
         position={[2, 3, -6]}
         angle={0.55}
         penumbra={1}
-        intensity={4.5}
+        intensity={20.0}
         color="#ffb178"
         castShadow
         shadow-mapSize={[1024, 1024]}
@@ -60,20 +71,12 @@ export default function Scene() {
         position={[0, 12, 0]}
         angle={0.5}
         penumbra={0.9}
-        intensity={3.0}
+        intensity={20.0}
         color="#fff0dc"
         castShadow
         shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0005}
         shadow-normalBias={0.02}
-      />
-
-      <pointLight
-        position={[3, 2, 2]}
-        intensity={0.9}
-        color="#ff8a3d"
-        distance={7}
-        decay={2}
       />
 
       <Environment resolution={256} frames={1} preset="city" environmentIntensity={100}>
@@ -86,8 +89,6 @@ export default function Scene() {
       <Suspense fallback={null}>
         <Overlay />
         <Table />
-        <Fabric />
-        <MakeupProps />
         <Lipstick />
 
         <ContactShadows
@@ -100,7 +101,9 @@ export default function Scene() {
         />
       </Suspense>
 
-      <EffectComposer multisampling={4}>
+
+      {/* Effects */}
+      {/* <EffectComposer multisampling={4}>
         <DepthOfField
           focusDistance={10}
           focalLength={23}
@@ -118,7 +121,7 @@ export default function Scene() {
           darkness={0.75}
           blendFunction={BlendFunction.NORMAL}
         />
-      </EffectComposer>
+      </EffectComposer> */}
     </Canvas>
   );
 }

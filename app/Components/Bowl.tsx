@@ -39,7 +39,7 @@ export default function Bowl() {
     if (!meshRef.current) return;
     const scroll = useScrollStore.getState().scrollProgress;
 
-    const y = readTrack(scroll, "bowl.y") ?? 0.2;
+    const y = readTrack(scroll, "bowl.y") ?? 0.5;
     const rot = readTrack(scroll, "bowl.rotation") ?? 0;
     const rotDeg = readTrack(scroll, "bowl.rotation") ?? 0;
     const rotRad = THREE.MathUtils.degToRad(rotDeg);

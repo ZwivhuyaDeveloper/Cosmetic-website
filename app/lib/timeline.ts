@@ -11,26 +11,26 @@ export type Track = Keyframe[];
 export const TRACKS = {
   "bowl.y": [
     { scroll: 0.00, value: 0.1, ease: "none" },  // start on table
-    { scroll: 0.05, value: 1.0, ease: "sine.out" },  // lifted during hero
-    { scroll: 0.50, value: 1.0, ease: "sine.in" },
-    { scroll: 0.70, value: 0.1, ease: "sine.out" },     // reset to initial Y
+    { scroll: 0.10, value: 1.5, ease: "sine.out" },  // lifted during hero
+    { scroll: 0.50, value: 1.5, ease: "sine.in" },
+    { scroll: 0.70, value: 0.1, ease: "none" },     // reset to initial Y
   ],
     "bowl.rotation.x": [
     { scroll: 0.00, value: 0,   ease: "none" },
-    { scroll: 0.50, value: 360, ease: "circ.in" },
+    { scroll: 0.50, value: 360, ease: "none" },
     ],
     "bowl.rotation.y": [
     { scroll: 0.00, value: 0,   ease: "none" },
-    { scroll: 0.50, value: 720, ease: "none" },
+    { scroll: 0.50, value: 720, ease: "sine.out" },
     ],
     "bowl.rotation.z": [
     { scroll: 0.00, value: 0,   ease: "none" },
-    { scroll: 0.50, value: 360, ease: "circ.in" },
+    { scroll: 0.50, value: 360, ease: "none" },
     ],
   "text.opacity": [
     { scroll: 0.30, value: 0, ease: "power1.in" },
     { scroll: 0.40, value: 1, ease: "power1.out" },
-    { scroll: 0.50, value: 0, ease: "power1.in" },
+    { scroll: 0.70, value: 0, ease: "power1.in" },
   ],
   "overlay.opacity": [
     { scroll: 0.30, value: 0, ease: "power1.in" },
