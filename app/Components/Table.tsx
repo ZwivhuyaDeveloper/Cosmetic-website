@@ -31,16 +31,23 @@ export default function Table() {
         );
       });
 
-    console.log("Loading:", albedoUrl, normalUrl, roughnessUrl);
-
     Promise.all([load(albedoUrl), load(normalUrl), load(roughnessUrl)])
       .then(([albedo, normal, roughness]) => {
-        albedo.colorSpace = THREE.SRGBColorSpace;
+        // ── Color spaces ──────────────────────────────────────────
+        // Albedo carries color          → sRGB
+        // Normal + roughness are *data* → linear (NoColorSpace)
+        // Getting these wrong is what darkens a light marble.
+        albedo.colorSpace    = THREE.SRGBColorSpace;
+        normal.colorSpace    = THREE.NoColorSpace;
+        roughness.colorSpace = THREE.NoColorSpace;
+
         [albedo, normal, roughness].forEach((t) => {
           t.wrapS = t.wrapT = THREE.RepeatWrapping;
           t.repeat.set(2, 2);
           t.anisotropy = 16;
+          t.needsUpdate = true; // force GPU re-upload with new colorSpace
         });
+
         setMaps({ albedo, normal, roughness });
       })
       .catch((e) => console.error("[Table]", e));
@@ -63,11 +70,11 @@ export default function Table() {
         normalMap={maps.normal}
         normalScale={new THREE.Vector2(0.6, 0.6)}
         roughnessMap={maps.roughness}
-        roughness={1.5}
+        roughness={1.0}              /* was 1.5 — clamped anyway */
         metalness={0.0}
-        clearcoat={0.9}
-        clearcoatRoughness={0.1}
-        envMapIntensity={0.8}
+        clearcoat={0.4}              /* was 0.9 — a thin polish, not a mirror */
+        clearcoatRoughness={0.25}    /* was 0.1 — softer, less black hotspots */
+        envMapIntensity={1.4}        /* was 0.8 — compensate for the dark IBL */
       />
     </mesh>
   );

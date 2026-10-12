@@ -12,7 +12,7 @@ import SecondSection from "./SecondSection";
 
 export default function Container() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const scrollProgress = useScrollStore((s) => s.scrollProgress); // only for the indicator
+  const scrollProgress = useScrollStore((s) => s.scrollProgress);
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -46,17 +46,19 @@ export default function Container() {
   return (
     <section ref={containerRef} className="relative h-screen w-full overflow-hidden">
       <SecondSection />
+
       <div className="fixed inset-0 z-0">
-        {/* no more prop drilling */}
         <Scene />
       </div>
-      
+
+      {/* Sticky header — floats above every section */}
+      <Header />
+
       <div className="relative z-10 pointer-events-none h-full">
         <Hero />
         <ScrollIndicator visible={scrollProgress < 0.1} />
       </div>
 
-      {/* no more prop drilling */}
       <SubtitleOverlay />
     </section>
   );

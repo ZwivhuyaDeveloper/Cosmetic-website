@@ -48,8 +48,9 @@ export default function SubtitleOverlay() {
         <br />
         A COASTER.
       </h2>
-      <p className="subtitle-right max-w-[320px] text-[22px] leading-snug text-[#f5e6d3] opacity-0">
-        Lumiere isn&apos;t just a make up.
+      <p className="subtitle-right max-w-[360px] text-[33px] leading-snug text-[#f5e6d3] opacity-0">
+        "Lumiere isn&apos;t just a make up.
+        It&apos;s a statement for the world."
       </p>
       <span className="subtitle-footnote absolute bottom-8 right-8 text-right text-[11px] tracking-widest text-[#f5e6d3]/70 opacity-0">
         LOOK
