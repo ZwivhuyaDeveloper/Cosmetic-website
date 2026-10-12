@@ -3,18 +3,30 @@
 import { useEffect, useState } from "react";
 import * as THREE from "three";
 
-import albedoImg    from "../../public/textures/marble/Marble014_2K-JPG_Color.jpg";
-import normalImg    from "../../public/textures/marble/Marble014_2K-JPG_NormalGL.jpg";
-import roughnessImg from "../../public/textures/marble/Marble014_2K-JPG_Roughness.jpg";
+import albedoImg from "../../public/textures/marble/white_marble.jpg";
+import roughnessImg from "../../public/textures/marble/white_marble_roughness.jpg";
 
-const albedoUrl    = typeof albedoImg    === "string" ? albedoImg    : (albedoImg as any).src;
-const normalUrl    = typeof normalImg    === "string" ? normalImg    : (normalImg as any).src;
-const roughnessUrl = typeof roughnessImg === "string" ? roughnessImg : (roughnessImg as any).src;
+const albedoUrl =
+  typeof albedoImg === "string" ? albedoImg : (albedoImg as any).src;
+const roughnessUrl =
+  typeof roughnessImg === "string" ? roughnessImg : (roughnessImg as any).src;
+
+/* ────────────────────────────────────────────────────────────────────
+   Marble surface (Δ3) — white Calacatta-style stone replacing the
+   warm-brown Marble014.
+
+   Mapping (checked — no distortion, no seams in frame):
+   · albedo is a square 751² crop → maps square-to-square on the plane
+   · repeat 1.25 → one tile spans 16 world units; the tile wrap seam
+     sits at x/z ≈ +6, beyond the visible window (±5 / ±2.5)
+   · albedo sRGB, roughness linear data; both share the same repeat so
+     the veins keep their slightly rougher finish
+   · polished stone = map-driven roughness + a soft clearcoat sheen
+   ──────────────────────────────────────────────────────────────────── */
 
 export default function Table() {
   const [maps, setMaps] = useState<{
     albedo: THREE.Texture;
-    normal: THREE.Texture;
     roughness: THREE.Texture;
   } | null>(null);
 
@@ -31,24 +43,20 @@ export default function Table() {
         );
       });
 
-    Promise.all([load(albedoUrl), load(normalUrl), load(roughnessUrl)])
-      .then(([albedo, normal, roughness]) => {
-        // ── Color spaces ──────────────────────────────────────────
-        // Albedo carries color          → sRGB
-        // Normal + roughness are *data* → linear (NoColorSpace)
-        // Getting these wrong is what darkens a light marble.
-        albedo.colorSpace    = THREE.SRGBColorSpace;
-        normal.colorSpace    = THREE.NoColorSpace;
+    Promise.all([load(albedoUrl), load(roughnessUrl)])
+      .then(([albedo, roughness]) => {
+        // Albedo carries colour → sRGB · roughness is *data* → linear
+        albedo.colorSpace = THREE.SRGBColorSpace;
         roughness.colorSpace = THREE.NoColorSpace;
 
-        [albedo, normal, roughness].forEach((t) => {
+        [albedo, roughness].forEach((t) => {
           t.wrapS = t.wrapT = THREE.RepeatWrapping;
-          t.repeat.set(2, 2);
+          t.repeat.set(1.25, 1.25);
           t.anisotropy = 16;
-          t.needsUpdate = true; // force GPU re-upload with new colorSpace
+          t.needsUpdate = true; // force GPU re-upload with new settings
         });
 
-        setMaps({ albedo, normal, roughness });
+        setMaps({ albedo, roughness });
       })
       .catch((e) => console.error("[Table]", e));
   }, []);
@@ -57,7 +65,7 @@ export default function Table() {
     return (
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[20, 20]} />
-        <meshPhysicalMaterial color="#e8e4dc" roughness={0.3} metalness={0} />
+        <meshPhysicalMaterial color="#ece7df" roughness={0.3} metalness={0} />
       </mesh>
     );
   }
@@ -66,15 +74,15 @@ export default function Table() {
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
       <planeGeometry args={[20, 20]} />
       <meshPhysicalMaterial
+        color="#ffffff"
         map={maps.albedo}
-        normalMap={maps.normal}
-        normalScale={new THREE.Vector2(0.6, 0.6)}
         roughnessMap={maps.roughness}
-        roughness={1.0}              /* was 1.5 — clamped anyway */
+        roughness={1.0} /* map-driven: polished field ≈ 0.27, veins ≈ 0.45 */
         metalness={0.0}
-        clearcoat={0.4}              /* was 0.9 — a thin polish, not a mirror */
-        clearcoatRoughness={0.25}    /* was 0.1 — softer, less black hotspots */
-        envMapIntensity={1.4}        /* was 0.8 — compensate for the dark IBL */
+        clearcoat={0.35} /* polished stone sheen */
+        clearcoatRoughness={0.5}
+        clearcoatRoughnessMap={maps.roughness}
+        envMapIntensity={1.2}
       />
     </mesh>
   );
