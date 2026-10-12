@@ -8,6 +8,7 @@ import { useScrollStore } from "../lib/useScrollStore";
 import Scene from "./Scene";
 import SubtitleOverlay from "./SubtitleOverlay";
 import Hero from "./Hero";
+import SecondSection from "./SecondSection";
 
 export default function Container() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -44,6 +45,7 @@ export default function Container() {
 
   return (
     <section ref={containerRef} className="relative h-screen w-full overflow-hidden">
+      <SecondSection />
       <div className="fixed inset-0 z-0">
         {/* no more prop drilling */}
         <Scene />

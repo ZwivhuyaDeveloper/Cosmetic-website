@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useScrollStore } from "../lib/useScrollStore";
 import { readTrack } from "../lib/sample";
+import { Text } from "@react-three/drei";
 
 export default function Overlay() {
   const meshRef = useRef<THREE.Mesh>(null);

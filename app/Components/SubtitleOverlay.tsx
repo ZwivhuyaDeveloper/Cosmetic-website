@@ -5,6 +5,8 @@ import gsap from "gsap";
 import { useScrollStore } from "../lib/useScrollStore";
 import { readTrack } from "../lib/sample";
 
+
+
 export default function SubtitleOverlay() {
   const containerRef = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
@@ -54,6 +56,8 @@ export default function SubtitleOverlay() {
         <br />
         BEAUTIFUL
       </span>
+
+      
     </div>
   );
 }

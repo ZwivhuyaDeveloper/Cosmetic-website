@@ -35,6 +35,8 @@ export default function Scene() {
     >
       <ambientLight intensity={0.08} color="#1a1c2e" />
 
+      <ambientLight position={[0, 0, 0]} castShadow intensity={5} color="#ffffff" />
+
       <directionalLight
         position={[4, 10, 5]}
         intensity={10.0}
@@ -46,7 +48,7 @@ export default function Scene() {
       />
 
       <directionalLight
-        position={[-4, 10,-5]}
+        position={[-4, 10, -5]}
         intensity={20.0}
         color="#585654"
         castShadow
@@ -69,7 +71,7 @@ export default function Scene() {
         shadow-normalBias={0.02}
       />
       <spotLight
-        position={[0, 12, 0]}
+        position={[0, 20, 0]}
         angle={0.5}
         penumbra={0.9}
         intensity={20.0}
